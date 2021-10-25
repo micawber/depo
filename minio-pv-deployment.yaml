@@ -1,0 +1,100 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: minio
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: minio
+  name: minio-pvc1
+  labels:
+    app: minio
+spec:
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: minio
+  name: minio-pvc2
+  labels:
+    app: minio
+spec:
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: minio
+  name: minio
+  labels:
+    component: minio
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      component: minio
+  template:
+    metadata:
+      labels:
+        component: minio
+    spec:
+      volumes:
+      - name: storage
+        persistentVolumeClaim:
+          claimName: minio-pvc1
+      - name: config
+        persistentVolumeClaim:
+          claimName: minio-pvc2
+      containers:
+      - name: minio
+        image: minio/minio:RELEASE.2020-05-01T22-19-14Z
+        imagePullPolicy: IfNotPresent
+        args:
+        - server
+        - /storage
+        - --config-dir=/config
+        env:
+        - name: MINIO_ACCESS_KEY
+          value: "minio"
+        - name: MINIO_SECRET_KEY
+          value: "minio123"
+        ports:
+        - containerPort: 9000
+        volumeMounts:
+        - name: storage
+          mountPath: /storage
+        - name: config
+          mountPath: /config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: minio
+  name: minio
+  labels:
+    component: minio
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9000
+      targetPort: 9000
+      protocol: TCP
+  selector:
+    component: minio
