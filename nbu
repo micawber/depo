@@ -1,0 +1,136 @@
+sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+
+systemctl stop firewalld
+systemctl disable firewalld
+
+cat <<EOT>> /etc/security/limits.conf
+*      soft    core           unlimited
+*      hard    core           unlimited
+*      soft    nofile         32768
+*      hard    nofile         63535
+*      soft    stack          32768
+*      hard    stack          63535
+EOT
+
+echo "kernel.sem = 400 307200 128 1024" >> /etc/sysctl.conf
+echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
+echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
+echo "net.core.rmem_max = 1073741824" >> /etc/sysctl.conf
+echo "net.core.wmem_max = 1073741824" >> /etc/sysctl.conf
+echo "net.core.rmem_default = 524288" >> /etc/sysctl.conf
+echo "net.core.wmem_default = 524288" >> /etc/sysctl.conf
+echo "net.core.somaxconn = 1024" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_rmem = 524288 524288 1073741824" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_wmem = 524288 524288 1073741824" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_keepalive_time = 900" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_keepalive_probes = 5" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_keepalive_intvl = 10" >> /etc/sysctl.conf
+echo "vm.swappiness = 1" >> /etc/sysctl.conf
+echo "vm.overcommit_ratio = 100" >> /etc/sysctl.conf
+echo "vm.extfrag_threshold = 1000" >> /etc/sysctl.conf
+echo "fs.inotify.max_user_watches = 32768" >> /etc/sysctl.conf
+echo "kernel.numa_balancing = 0" >> /etc/sysctl.conf
+sysctl -p
+
+groupadd -g 1556 nbwebgrp
+useradd -g nbwebgrp -u 2021 nbwebsvc
+
+useradd -c 'NetBackup Services account' -d /usr/openv/ nbsvcusr
+usermod -a -G nbwebgrp nbsvcusr
+
+def=$(cat /root/.bash_profile | grep "\$PATH")
+echo $def
+nbu="/usr/openv/netbackup/bin:/usr/openv/netbackup/bin/admincmd:/usr/openv/netbackup/bin/goodies:/usr/openv/volmgr/bin:/usr/openv/pdde/pdcr/bin:/usr/openv/pdde/vpfs/bin"
+xxx=($def:$nbu)
+echo $xxx
+sed -i "s|$def|$xxx|g" /root/.bash_profile
+source /root/.bash_profile
+
+echo "insecure" >> $HOME/.curlrc
+echo ":set hlsearch" >> .vimrc
+echo ":set ic" >> .vimrc
+echo ":set number" >> .vimrc
+
+### REBOOT ###
+
+### Kurulum Bittikten Sonra Çalıştırılacak ###
+
+mkdir /usr/openv/netbackup/db/altnames
+touch /usr/openv/netbackup/db/altnames/No.Restrictions
+
+touch /usr/openv/netbackup/db/config/DPS_PROXYNOEXPIRE 
+echo "3600" > /usr/openv/netbackup/db/config/DPS_PROXYDEFAULTSENDTMO
+echo "3600" > /usr/openv/netbackup/db/config/DPS_PROXYDEFAULTRECVTMO
+
+echo "1000000" > /usr/openv/netbackup/db/config/BPSCHED_THRESHOLD
+echo "25000000" > /usr/openv/netbackup/db/config/RBALLOC_KBYTES_THRESHOLD
+echo "100000" > /usr/openv/netbackup/MAX_ENTRIES_PER_ADD
+echo "3600" > /usr/openv/netbackup/db/config/REPORT_RAW_KBS
+echo "0" > /usr/openv/netbackup/NET_BUFFER_SZ
+
+echo "20"> /usr/openv/netbackup/bin/DBMto
+echo "600"> /usr/openv/netbackup/DB_TIMEOUT
+
+echo "VIRTUALIZATION_HOSTS_SECURE_CONNECT_ENABLED = NO" | nbsetconfig
+echo "DISABLE_WHITELISTCACHE_CLEANUP_ON_JOB_START = 1" | nbsetconfig
+echo "KEEP_JOBS_HOURS = 192" | nbsetconfig
+echo "VMWARE_AUTODISCOVERY_INTERVAL = 7200" | nbsetconfig
+echo "VMWARE_TLS_MINIMUM_V1_2 = NO" | nbsetconfig
+
+mkdir /MSDP
+echo -e "o\nn\np\n1\n\n\nw" | fdisk /dev/sdb
+vgcreate vg_nbu_msdp /dev/sdb1
+lvcreate -n vol1 -l 100%FREE vg_nbu_msdp
+mkfs.xfs /dev/vg_nbu_msdp/vol1
+echo -e "/dev/vg_nbu_msdp/vol1\t/MSDP\txfs\tdefaults\t0 0" >> /etc/fstab
+mount -a
+
+### Concat Volume ###
+mkdir /MSDP
+parted --script /dev/sdb unit GiB mklabel gpt mkpart primary 0% 100%
+pvcreate /dev/sdb1
+vgcreate vg_nbu_msdp /dev/sdb1
+lvcreate -l 100%FREE -n vol1 vg_nbu_msdp
+mkfs.xfs /dev/vg_nbu_msdp/vol1
+echo -e "/dev/vg_nbu_msdp/vol1\t/MSDP\txfs\tdefaults\t0 0" >> /etc/fstab
+mount -a
+
+### Striped Volume (Cloud Instance) ###
+parted --script /dev/sdb unit GiB mklabel gpt mkpart primary 0% 100%
+pvcreate /dev/sdc1 /dev/sdd1 /dev/sde1 /dev/sdf1
+vgcreate vg_nbu_msdp /dev/sdc1 /dev/sdd1 /dev/sde1 /dev/sdf1
+lvcreate -i4 -I128k -l 100%FREE -n striped_vol1 vg_nbu_msdp
+
+###PBX ###
+/etc/init.d/vxpbx_exchanged
+/opt/VRTSpbx/bin/vxpbx_exchanged
+
+### BYO IA ###
+grep --color vmx /proc/cpuinfo
+
+/usr/openv/pdde/vpfs/bin/ia_byo_precheck.sh
+/usr/openv/pdde/vpfs/bin/vpfs_config.sh --configure_byo
+
+/usr/openv/pdde/vpfs/etc/init.d/vpfs_mounts stop
+/usr/openv/pdde/vpfs/bin/vpfs_actions --action unexportAndDelete --clientHost localhost --mountPoint /mnt/vpfs_shares/8b5b/8b5bf8a9....
+
+### MSDP Multi-Domain ###
+# Create an user on target MSDP
+/usr/openv/pdde/pdcr/bin/spauser -a -u userx -p passwordx
+# Certificate operations on media servers and clients using CSD. Create a token on master-server.local.
+nbcertcmd -GetCACertificate -server master-server.local
+nbcertcmd -GetCertificate -server master-server.local -token KALFLCGCFLFMWGWW
+# Monitor tasks on target MSDP
+/usr/openv/pdde/pdcr/bin/crcontrol --taskstat
+
+### Uninstall NBU ###
+Sıralama: VRTSnbjava* VRTSnbjre* VRTSnetb* VRTSnbcfg* VRTSnbclt* VRTSnbpck* VRTSpddei* VRTSpddes* VRTSpddea* VRTSpbx*
+rpm -qa | grep VRTS > /tmp/nbu-sil.txt
+for i in `cat /tmp/nbu-sil.txt`; do rpm -e $i; done
+rm -rf /usr/openv /var/veritas /var/log/VRTSpbx /etc/vx
+
+### server.conf tuning ###
+/usr/openv/var/global/server.conf
+-c 100M -ch 1024M -cl 100M
+Recommended increasing the "-ch" value to 4096 as the default is often too small for larger catalogs/environments.
