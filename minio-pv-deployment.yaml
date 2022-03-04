@@ -12,7 +12,7 @@ metadata:
   labels:
     app: minio
 spec:
-  storageClassName: standard
+  storageClassName: ocs-storagecluster-ceph-rbd
   accessModes:
     - ReadWriteOnce
   resources:
@@ -28,7 +28,7 @@ metadata:
   labels:
     app: minio
 spec:
-  storageClassName: standard
+  storageClassName: ocs-storagecluster-ceph-rbd
   accessModes:
     - ReadWriteOnce
   resources:
