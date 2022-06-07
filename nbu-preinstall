@@ -1,4 +1,5 @@
-ed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+
+sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 
 systemctl stop firewalld
@@ -40,6 +41,9 @@ sysctl -p
 groupadd -g 1556 nbwebgrp
 useradd -g nbwebgrp -u 2022 nbwebsvc
 
+useradd -c 'NetBackup Services Account' -d /usr/openv/ nbsvcusr
+usermod -a -G nbwebgrp nbsvcusr
+
 def=$(cat /root/.bash_profile | grep "\$PATH")
 echo $def
 nbu="/usr/openv/netbackup/bin:/usr/openv/netbackup/bin/admincmd:/usr/openv/netbackup/bin/goodies:/usr/openv/volmgr/bin:/usr/openv/pdde/pdcr/bin:/usr/openv/pdde/vpfs/bin"
@@ -65,3 +69,38 @@ lvcreate -l 100%FREE -n vol1 vg_nbu_msdp
 mkfs.xfs /dev/vg_nbu_msdp/vol1
 echo -e "/dev/vg_nbu_msdp/vol1\t/MSDP\txfs\tdefaults\t0 0" >> /etc/fstab
 mount -a
+####
+
+### Kurulum Bittikten Sonra Çalıştırılacak ###
+mkdir /usr/openv/netbackup/db/altnames
+touch /usr/openv/netbackup/db/altnames/No.Restrictions
+
+touch /usr/openv/netbackup/db/config/DPS_PROXYNOEXPIRE 
+echo "3600" > /usr/openv/netbackup/db/config/DPS_PROXYDEFAULTSENDTMO
+echo "3600" > /usr/openv/netbackup/db/config/DPS_PROXYDEFAULTRECVTMO
+
+echo "1000000" > /usr/openv/netbackup/db/config/BPSCHED_THRESHOLD
+echo "25000000" > /usr/openv/netbackup/db/config/RBALLOC_KBYTES_THRESHOLD
+echo "100000" > /usr/openv/netbackup/MAX_ENTRIES_PER_ADD
+echo "3600" > /usr/openv/netbackup/db/config/REPORT_RAW_KBS
+echo "0" > /usr/openv/netbackup/NET_BUFFER_SZ
+
+### Flex
+mkdir ~/nbu_config; cd ~/nbu_config
+ 
+echo 1000000 > BPSCHED_THRESHOLD
+echo 25000000 > RBALLOC_KBYTES_THRESHOLD
+echo 3600 > REPORT_RAW_KBS
+echo 1800 > DPS_PROXYDEFAULTRECVTMO
+echo 1800 > DPS_PROXYDEFAULTSENDTMO
+echo 0 > NET_BUFFER_SZ
+echo 100000 > MAX_ENTRIES_PER_ADD
+
+sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/BPSCHED_THRESHOLD /usr/openv/netbackup/db/config
+sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/RBALLOC_KBYTES_THRESHOLD /usr/openv/netbackup/db/config 
+sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/REPORT_RAW_KBS /usr/openv/netbackup/db/config
+sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/DPS_PROXYDEFAULTRECVTMO /usr/openv/netbackup/db/config
+sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/DPS_PROXYDEFAULTSENDTMO /usr/openv/netbackup/db/config
+sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/NET_BUFFER_SZ /usr/openv/netbackup/
+sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/MAX_ENTRIES_PER_ADD /usr/openv/netbackup
+sudo /usr/openv/netbackup/bin/goodies/bpconverttouch -f
