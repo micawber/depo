@@ -86,6 +86,7 @@ echo "3600" > /usr/openv/netbackup/db/config/REPORT_RAW_KBS
 echo "0" > /usr/openv/netbackup/NET_BUFFER_SZ
 
 ### Flex
+sudo -s su -
 mkdir ~/nbu_config; cd ~/nbu_config
  
 echo 1000000 > BPSCHED_THRESHOLD
@@ -104,3 +105,6 @@ sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/DPS_PROXYDEFAULTSENDTM
 sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/NET_BUFFER_SZ /usr/openv/netbackup/
 sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/MAX_ENTRIES_PER_ADD /usr/openv/netbackup
 sudo /usr/openv/netbackup/bin/goodies/bpconverttouch -f
+
+### Reiamge sonrası cert import
+/opt/veritas/appliance/tools/device-cert_ssd.sh -i
