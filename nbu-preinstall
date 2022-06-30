@@ -29,8 +29,6 @@ echo "net.ipv4.tcp_keepalive_time = 700" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_keepalive_probes = 10" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_keepalive_intvl = 20" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_fin_timeout = 5" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_tw_recycle = 1" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_tw_reuse = 1" >> /etc/sysctl.conf
 echo "vm.swappiness = 1" >> /etc/sysctl.conf
 echo "vm.overcommit_ratio = 100" >> /etc/sysctl.conf
 echo "vm.extfrag_threshold = 1000" >> /etc/sysctl.conf
@@ -71,7 +69,7 @@ echo -e "/dev/vg_nbu_msdp/vol1\t/MSDP\txfs\tdefaults\t0 0" >> /etc/fstab
 mount -a
 ####
 
-### Kurulum Bittikten Sonra Çalıştırılacak ###
+### Kurulum Bittikten Sonra Çalıştırılacak
 mkdir /usr/openv/netbackup/db/altnames
 touch /usr/openv/netbackup/db/altnames/No.Restrictions
 
@@ -94,17 +92,17 @@ echo 25000000 > RBALLOC_KBYTES_THRESHOLD
 echo 3600 > REPORT_RAW_KBS
 echo 1800 > DPS_PROXYDEFAULTRECVTMO
 echo 1800 > DPS_PROXYDEFAULTSENDTMO
-echo 0 > NET_BUFFER_SZ
 echo 100000 > MAX_ENTRIES_PER_ADD
+echo 0 > NET_BUFFER_SZ
 
 sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/BPSCHED_THRESHOLD /usr/openv/netbackup/db/config
 sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/RBALLOC_KBYTES_THRESHOLD /usr/openv/netbackup/db/config 
 sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/REPORT_RAW_KBS /usr/openv/netbackup/db/config
 sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/DPS_PROXYDEFAULTRECVTMO /usr/openv/netbackup/db/config
 sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/DPS_PROXYDEFAULTSENDTMO /usr/openv/netbackup/db/config
-sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/NET_BUFFER_SZ /usr/openv/netbackup/
 sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/MAX_ENTRIES_PER_ADD /usr/openv/netbackup
+sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/NET_BUFFER_SZ /usr/openv/netbackup/
 sudo /usr/openv/netbackup/bin/goodies/bpconverttouch -f
 
-### Reiamge sonrası cert import
+### Re-image sonrası cert import
 /opt/veritas/appliance/tools/device-cert_ssd.sh -i
