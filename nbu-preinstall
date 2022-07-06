@@ -44,7 +44,7 @@ usermod -a -G nbwebgrp nbsvcusr
 
 def=$(cat /root/.bash_profile | grep "\$PATH")
 echo $def
-nbu="/usr/openv/netbackup/bin:/usr/openv/netbackup/bin/admincmd:/usr/openv/netbackup/bin/goodies:/usr/openv/volmgr/bin:/usr/openv/pdde/pdcr/bin:/usr/openv/pdde/vpfs/bin"
+nbu="/usr/openv/netbackup/bin:/usr/openv/netbackup/bin/admincmd:/usr/openv/netbackup/bin/goodies:/usr/openv/volmgr/bin:/usr/openv/pdde/pdcr/bin:/usr/openv/pdde/vpfs/bin:/opt/VRTS/bin:/opt/VRTSvcs/bin"
 xxx=($def:$nbu)
 echo $xxx
 sed -i "s|$def|$xxx|g" /root/.bash_profile
