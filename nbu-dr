@@ -1,0 +1,155 @@
+[appadmin@flex-03-nbprimary DR]$ sudo su -
+
+We trust you have received the usual lecture from the local System
+Administrator. It usually boils down to these three things:
+
+    #1) Respect the privacy of others.
+    #2) Think before you type.
+    #3) With great power comes great responsibility.
+
+[sudo] password for appadmin:
+-bash-4.2# cd /tmp/DR/
+-bash-4.2# ls -al
+total 124
+drwx------.  2 appadmin users    100 Sep 30 13:03 .
+drwxrwxrwt. 19 root     root     860 Sep 30 13:07 ..
+-rwx------.  1 appadmin users   3385 Sep 30 12:46 CATALOG-BACKUP_1664536575_FULL
+-rwx------.  1 appadmin users 116701 Sep 30 12:46 CATALOG-BACKUP_1664536575_FULL.drpkg
+-bash-4.2# 
+-bash-4.2# nbhostidentity -import -infile CATALOG-BACKUP_1664536575_FULL.drpkg
+WARNING - If new certificates are deployed on the media servers or clients after NetBackup master server installation, certificates on those hosts should be redeployed. To identify the hosts that need certificate redeployment, go to NetBackup Administration Console > Host Properties > Clients.
+This process requires you to restart the NetBackup services.
+It is strongly recommended that you immediately perform catalog recovery after the execution of this command.
+Are you sure you want to proceed (y/n)? y
+Enter the passphrase for the disaster recovery package. The passphrase is used to decrypt the disaster recovery package that you want to import.
+Passphrase:
+Initiating import of the host identity...
+Starting the NetBackup database...
+The NetBackup database process has successfully started.
+Stopping the NetBackup database...
+The database process has stopped successfully.
+
+The host identity is successfully imported.
+The host identity import is complete. Start all NetBackup processes.
+It is strongly recommended that you immediately perform catalog recovery.
+Command is successfully carried out.
+-bash-4.2#
+-bash-4.2# bp.start_all
+Starting nbpas...
+Starting vnetd...
+Starting NB_dbsrv...
+Starting nbatd...
+Starting nbazd...
+Starting nbaudit...
+Starting nbwmc...
+Starting NetBackup Web Management Console could take a couple of minutes .... started.
+Starting nbmqbroker...
+Starting NetBackup Messaging Queue Broker could take a couple of minutes .. started.
+Starting bpcd...
+Starting nbftclnt...
+Starting nbdisco...
+Starting nbevtmgr...
+Starting ocsd...
+Starting spad...
+Starting spoold...
+Starting nbcosp...
+Starting nbemm...
+Starting nbrb...
+Starting ltid...
+Starting bprd...
+Starting bpcompatd...
+Starting nbjm...
+Starting nbpem...
+Starting nbstserv...
+Starting nbrmms...
+Starting nbkms...
+Starting nbsl...
+Starting nbim...
+Starting nbars...
+Starting bmrd...
+Starting nbvault...
+Starting nbanomalymgmt...
+Starting nbcctd...
+Starting nbsvcmon...
+Starting bmrbd...
+-bash-4.2# nbcertcmd -displaycacertdetail
+
+
+CA Certificate received successfully from server flex-03-nbprimary.demo.veritas.com.
+
+             Subject Name : /CN=nbatd/OU=root@flex-03-nbprimary.demo.veritas.com/O=vx
+               Start Date : Sep 12 08:22:43 2022 GMT
+              Expiry Date : Sep 07 09:37:43 2042 GMT
+        SHA-1 Fingerprint : FA:03:F7:4E:0F:8F:02:C3:8B:FC:7B:2F:F3:14:BC:FB:D8:EC:C3:E1
+      SHA-256 Fingerprint : F2:1B:69:32:3E:61:EB:06:E1:FF:0A:23:32:4D:63:E1:6B:90:90:15:C9:90:A4:14:6F:04:85:6E:2A:CA:C4:50
+     CA Certificate State : Trusted
+             Key Strength : 2048
+   Subject Key Identifier : F3:09:9F:21:88:87:93:F1:90:F3:13:42:6B:26:47:43:52:DF:3E:D7
+
+-bash-4.2#
+-bash-4.2# nbdevconfig -creatests -storage_server flex-03-worm1-ss.demo.veritas.com -stype PureDisk -media_server flex-03-nbprimary.demo.veritas.com
+Storage server flex-03-worm1-ss.demo.veritas.com has been successfully created
+-bash-4.2#
+-bash-4.2# tpconfig -add -storage_server flex-03-worm1-ss.demo.veritas.com -stype PureDisk -sts_user_id wormusr
+OpenStorage password must be at least 8 characters long, contain at least one number and one special character and have a mixture of uppercase and lowercase letters.
+
+Enter the OpenStorage host's password for User Id wormusr:
+
+Please re-enter the OpenStorage host's password to confirm it:
+
+-bash-4.2# nbdevconfig -previewdv -storage_server flex-03-worm1-ss.demo.veritas.com -stype PureDisk > volinfo.txt
+-bash-4.2# cat volinfo.txt
+V_6_ DiskVolume < "PureDiskVolume" "PureDiskVolume" 2093621656576 2092743859200 0 0 0 261120 0 0 0 43200 2764800 >
+-bash-4.2#
+-bash-4.2# nbdevconfig -createdp -dp dp_WORM1 -storage_server flex-03-worm1-ss.demo.veritas.com -stype PureDisk -dvlist volinfo.txt
+Disk pool dp_WORM1 has been successfully created with 1 volumes
+-bash-4.2#
+-bash-4.2# nbcatsync -sync_dr_file /tmp/DR/CATALOG-BACKUP_1664536575_FULL
+All media resources were located
+   Primary Disk Media Id      Current Disk Media Id
+   =====================      =====================
+   @aaaad                     @aaaab
+
+-bash-4.2# bprecover -wizard
+
+Welcome to the NetBackup Catalog Recovery Wizard!
+
+Please make sure the devices and media that contain catalog disaster recovery
+data are available
+Are you ready to continue?(Y/N)
+y
+
+Please specify the full pathname to the catalog disaster recovery file:
+/tmp/DR/CATALOG-BACKUP_1664536575_FULL
+flex-03-nbprimary.demo.veritas.com_1664536575
+All media resources were located
+
+Do you want to recover the entire NetBackup catalog? (Y/N)
+y
+
+Do you want to startup the NetBackup relational database (NBDB) after the recovery?(Y/N)
+y
+
+Catalog recovery is in progress. Please wait...
+Gathering configuration information.
+Waiting for the security services to start operation.
+Generating identity for host 'flex-03-nbprimary.demo.veritas.com'
+Setting up security on target host: flex-03-nbprimary.demo.veritas.com
+nbatd is successfully configured on NetBackup Master Server.
+Operation completed successfully.
+
+Beginning recovery of NBDB.  Please wait...
+Completed successful recovery of NBDB on flex-03-nbprimary.demo.veritas.com
+
+WRN - Passphrase for the disaster recovery package is not set.
+You must set the passphrase for the catalog backups to be successful.
+
+INF - Catalog recovery has completed.
+
+WRN - NetBackup will not run scheduled backup jobs until NetBackup is restarted.
+
+WRN - Local or global-level settings that you have configured on the master server before catalog recovery are overwritten.
+It is recommended that you re-configure the required settings after the services are restarted.
+
+For more information, please review the log file:
+/usr/openv/netbackup/logs/user_ops/root/logs/Recover1664539790.log
