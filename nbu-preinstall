@@ -107,3 +107,6 @@ sudo /usr/openv/netbackup/bin/goodies/bpconverttouch -f
 
 ### Re-image sonrası cert import
 /opt/veritas/appliance/tools/device-cert_ssd.sh -i
+
+
+for i in `0 1 2 3 4 5`; do tcpdump -nn -v -i nic$i -s 1500 -c 1 'ether[20:2] == 0x2000' ; done
