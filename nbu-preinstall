@@ -26,12 +26,13 @@ echo "net.core.netdev_max_backlog = 30000" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_rmem = 524288 524288 1073741824" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_wmem = 524288 524288 1073741824" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_keepalive_time = 700" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_keepalive_probes = 10" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_keepalive_intvl = 20" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_keepalive_probes = 20" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_keepalive_intvl = 10" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_fin_timeout = 5" >> /etc/sysctl.conf
 echo "vm.swappiness = 1" >> /etc/sysctl.conf
 echo "vm.overcommit_ratio = 100" >> /etc/sysctl.conf
 echo "vm.extfrag_threshold = 1000" >> /etc/sysctl.conf
+echo "vm.vfs_cache_pressure = 200" >> /etc/sysctl.conf
 echo "fs.inotify.max_user_watches = 32768" >> /etc/sysctl.conf
 echo "fs.file-max = 262144" >> /etc/sysctl.conf
 echo "fs.leases-enable = 0" >> /etc/sysctl.conf
@@ -39,7 +40,7 @@ echo "kernel.numa_balancing = 0" >> /etc/sysctl.conf
 sysctl -p
 
 groupadd -g 1556 nbwebgrp
-useradd -g nbwebgrp -u 2022 nbwebsvc
+useradd -g nbwebgrp -u 2023 nbwebsvc
 
 useradd -c 'NetBackup Services Account' -d /usr/openv/ nbsvcusr
 usermod -a -G nbwebgrp nbsvcusr
@@ -107,6 +108,5 @@ sudo /usr/openv/netbackup/bin/goodies/bpconverttouch -f
 
 ### Re-image sonrası cert import
 /opt/veritas/appliance/tools/device-cert_ssd.sh -i
-
 
 for i in `0 1 2 3 4 5`; do tcpdump -nn -v -i nic$i -s 1500 -c 1 'ether[20:2] == 0x2000' ; done
