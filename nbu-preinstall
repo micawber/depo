@@ -34,7 +34,7 @@ echo "vm.overcommit_ratio = 100" >> /etc/sysctl.conf
 echo "vm.extfrag_threshold = 1000" >> /etc/sysctl.conf
 echo "vm.vfs_cache_pressure = 200" >> /etc/sysctl.conf
 echo "fs.inotify.max_user_watches = 32768" >> /etc/sysctl.conf
-echo "fs.file-max = 262144" >> /etc/sysctl.conf
+echo "fs.file-max = 1638400" >> /etc/sysctl.conf
 echo "fs.leases-enable = 0" >> /etc/sysctl.conf
 echo "kernel.numa_balancing = 0" >> /etc/sysctl.conf
 sysctl -p
@@ -52,7 +52,6 @@ xxx=($def:$nbu)
 echo $xxx
 sed -i "s|$def|$xxx|g" /root/.bash_profile
 source /root/.bash_profile
-
 export GREP_COLOR='1;31'
 export PS1="\[\e[1;33m\]\u\[\e[m\]@\[\e[1;36m\]\h\[\e[m\]:\$PWD> "
 
@@ -60,6 +59,8 @@ echo "insecure" >> $HOME/.curlrc
 echo ":set hlsearch" >> .vimrc
 echo ":set ic" >> .vimrc
 echo ":set number" >> .vimrc
+echo ":colo elflord" >> .vimrc
+echo ":syntax on" >> .vimrc
 
 ### Concat Volume for MSDP ###
 mkdir /MSDP
@@ -105,8 +106,5 @@ sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/DPS_PROXYDEFAULTSENDTM
 sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/MAX_ENTRIES_PER_ADD /usr/openv/netbackup
 sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/NET_BUFFER_SZ /usr/openv/netbackup/
 sudo /usr/openv/netbackup/bin/goodies/bpconverttouch -f
-
-### Re-image sonrası cert import
-/opt/veritas/appliance/tools/device-cert_ssd.sh -i
 
 for i in `0 1 2 3 4 5`; do tcpdump -nn -v -i nic$i -s 1500 -c 1 'ether[20:2] == 0x2000' ; done
