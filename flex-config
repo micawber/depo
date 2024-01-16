@@ -1,0 +1,75 @@
+p0=$(printf '=%.0s' {0..80}); p1=$(printf '=%.0s' {0..60}); p2=$(printf '=%.0s' {0..20});
+containerIDs=$(docker ps | grep "netbackup" | awk '{print $1}');
+echo -e "${containerIDs}"
+
+for containerID in ${containerIDs}; do
+   appHostname=$(docker inspect -f '{{.Config.Hostname}}' ${containerID})
+   appType=$(docker inspect -f '{{.Config.Image}}' ${containerID})
+   appID=$(docker ps | grep ${containerID} | awk '{print $NF}')
+   configFile=$(ls -1 /mnt/data/infra/profiles/instances/${appID}.json)
+   configShort=$(echo ${configFile} | awk -F/ '{print $NF}')
+   if [ -f ${configFile} ]; then
+     echo -e "\n${p0}\nHostname: ${appHostname}\nImage: ${appType}\nName: ${appID}\nProfile: ${configFile}\n${p0}"
+     echo -e "${p1}\nFile Descriptor Settings\n${p1}"
+     timeout 5 grep -A6 ulimit ${configFile}
+     echo -e "${p1}\nTCP Timeout Settings\n${p1}"
+     echo -e "${p2}\nTCP Keepalive - Runtime\n${p2}" 
+     timeout 5 docker exec ${containerID} /usr/sbin/sysctl -a 2>/dev/null | grep "tcp_keepalive_time\|tcp_keepalive_intvl\|tcp_keepalive_probes"
+     echo -e "${p2}\nTCP Keepalive - Instance Profile\n${p2}"  
+     grep "net.ipv4.tcp_" ${configFile}
+   fi
+done
+
+for containerID in ${containerIDs}; do
+  appHostname=$(docker inspect -f '{{.Config.Hostname}}' ${containerID})
+  appType=$(docker inspect --format='{{.Config.Image}}' ${containerID})
+  appID=$(docker ps | grep ${containerID} | awk '{print $NF}');
+  configFile=$(ls -1 /mnt/data/infra/profiles/instances/${appID}.json);
+  configShort=$(echo ${configFile} | awk -F/ '{print $NF}')
+  if [ -f ${configFile} ]; then
+    cp ${configFile} ${configFile}-backup
+    echo -e "\n${p0}\nHostname: ${appHostname}\nImage: ${appType}\nName: ${appID}\nProfile: ${configFile}\n${p0}";
+    echo -e "${p1}\nFile Descriptor Settings\n${p1}"
+    echo -e "${p2}\nBefore\n${p2}"
+    grep -A6 ulimit ${configFile}
+    sed -i 's/\"soft\"\:.*/\"soft\"\: 32768,/g' ${configFile}
+    sed -i 's/\"hard\"\:.*/\"hard\"\: 65535/g' ${configFile}
+    echo -e "${p2}\nAfter\n${p2}"
+    grep -A6 ulimit ${configFile}
+    echo -e "${p1}\nTCP Timeout Settings\n${p1}"
+    echo -e "${p2}\nBefore\n${p2}"
+    grep "net.ipv4.tcp_" ${configFile}
+    sed -i 's/net.ipv4.tcp_keepalive_probes=5/net.ipv4.tcp_keepalive_probes=20/g' ${configFile}
+    sed -i 's/net.ipv4.tcp_keepalive_time=900/net.ipv4.tcp_keepalive_time=700/g' ${configFile}
+    echo -e "${p2}\nAfter\n${p2}"
+    grep "net.ipv4.tcp_" ${configFile}
+    echo -e "${p1}\nValidation\n${p1}"
+    cat ${configFile} | jq 1>/dev/null 2>&1
+    echo $?
+  fi
+done
+---------------o---------------
+mkdir ~/nbu_config; cd ~/nbu_config
+ 
+echo 1000000 > BPSCHED_THRESHOLD
+echo 25000000 > RBALLOC_KBYTES_THRESHOLD
+echo 3600 > REPORT_RAW_KBS
+echo 1800 > DPS_PROXYDEFAULTRECVTMO
+echo 1800 > DPS_PROXYDEFAULTSENDTMO
+echo 100000 > MAX_ENTRIES_PER_ADD
+echo 0 > NET_BUFFER_SZ
+
+sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/BPSCHED_THRESHOLD /usr/openv/netbackup/db/config
+sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/RBALLOC_KBYTES_THRESHOLD /usr/openv/netbackup/db/config 
+sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/REPORT_RAW_KBS /usr/openv/netbackup/db/config
+sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/DPS_PROXYDEFAULTRECVTMO /usr/openv/netbackup/db/config
+sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/DPS_PROXYDEFAULTSENDTMO /usr/openv/netbackup/db/config
+sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/MAX_ENTRIES_PER_ADD /usr/openv/netbackup
+sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/NET_BUFFER_SZ /usr/openv/netbackup/
+sudo /usr/openv/netbackup/bin/goodies/bpconverttouch -f
+---------------o---------------
+cp /etc/opt/veritas/flex/hostagent.conf /etc/opt/veritas/flex/hostagent.conf.$HOSTNAME.$(date +"%y-%m-%d")
+vi /etc/opt/veritas/flex/hostagent.conf
+"appInstanceRootSize": "10G" 
+> change to >
+"appInstanceRootSize": "20G"
