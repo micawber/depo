@@ -75,4 +75,5 @@ for containerID in ${containerIDs}; do
   fi
 done
 ---------------o---------------
-
+echo "USE_ACCL_WITH_MTSTRM = 1" >> /usr/openv/lib/ost-plugins/pd.conf
+echo "MTSTRM_ALLOW_MSSQL = 1" >> /usr/openv/lib/ost-plugins/pd.conf
