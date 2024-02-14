@@ -44,7 +44,7 @@ echo "kernel.numa_balancing = 0" >> /etc/sysctl.conf
 sysctl -p
 
 groupadd -g 1556 nbwebgrp
-useradd -g nbwebgrp -u 2023 nbwebsvc
+useradd -g nbwebgrp -u 2024 nbwebsvc
 
 useradd -c 'NetBackup Services Account' -d /usr/openv/ nbsvcusr
 usermod -a -G nbwebgrp nbsvcusr
