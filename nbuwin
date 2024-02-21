@@ -1,0 +1,17 @@
+net user nbwebsvc Veritas!123 /add
+net localgroup nbwebgrp /add
+net localgroup nbwebgrp nbwebsvc /add
+
+Go to Control Panel > Administrative Tools > Local Security Policy (secpol.msc)
+Under Security Settings, click Local Policies and then User Rights Assignment
+Right-click on Log on as a service and select Properties
+Add the local user. The default local user name is "nbwebsvc".
+Save your changes and close the "Log on as a service" Properties dialog.
+
+### Windows PATH variable ###
+setx path "%path%;C:\Program Files\Veritas\NetBackup\bin;C:\Program Files\Veritas\NetBackup\bin\admincmd;C:\Program Files\Veritas\NetBackup\bin\goodies;C:\Program Files\Veritas\volmgr\bin;C:\Program Files\Veritas\pdde"
+
+### Windows Registry ###
+HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\Tcpip\Parameters
+KeepAliveTime = 750000 (REG_DWORD)
+KeepAliveInterval = 15000 (REG_DWORD)
