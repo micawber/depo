@@ -1,13 +1,15 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: pv-test
+  name: pv-test-1
+labels:
+    backup: yes
 
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  namespace: pv-test
+  namespace: pv-test-1
   name: myclaim
 spec:
   accessModes:
@@ -21,7 +23,7 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata:
-  namespace: pv-test
+  namespace: pv-test-1
   name: mypod
 spec:
   containers:
