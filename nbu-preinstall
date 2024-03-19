@@ -1,4 +1,4 @@
-yum install -y net-tools curl wget mc nc vim dos2unix ntsysv sysfsutils bind-utils yum-utils nfs-utils samba samba-winbind-clients sysstat mailx tcpdump libXtst xterm dnsmasq fuse fuse3 chrony nscd open-vm-tools libnsl libxcrypt-compat ncurses-compat-libs compat-openssl10.x86_64 libseccomp mailcap lvm2 selinu* udev python36 python3-magic perl nginx
+yum install -y net-tools curl wget mc nc vim dos2unix ntsysv sysfsutils bind-utils yum-utils nfs-utils samba samba-winbind-clients sysstat mailx tcpdump libXtst xterm dnsmasq fuse fuse3 chrony nscd open-vm-tools libnsl libxcrypt-compat ncurses-compat-libs compat-openssl10.x86_64 libseccomp mailcap lvm2 selinu* udev python36 python3-magic perl nginx fio
 yum install -y adcli realmd sssd oddjob oddjob-mkhomedir samba-common-tools krb5-workstation authselect-compat
 
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
