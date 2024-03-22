@@ -52,7 +52,7 @@ usermod -a -G nbwebgrp nbsvcusr
 
 def=$(cat /root/.bash_profile | grep "\$PATH")
 echo $def
-nbu="/usr/openv/netbackup/bin:/usr/openv/netbackup/bin/admincmd:/usr/openv/netbackup/bin/goodies:/usr/openv/volmgr/bin:/usr/openv/pdde/pdcr/bin:/usr/openv/pdde/pdag/bin:/usr/openv/pdde/vpfs/bin:/opt/VRTS/bin:/opt/VRTSvcs/bin"
+nbu="/usr/openv/netbackup/bin:/usr/openv/netbackup/bin/admincmd:/usr/openv/netbackup/bin/goodies:/usr/openv/netbackup/bin/goodies/support:/usr/openv/volmgr/bin:/usr/openv/pdde/pdcr/bin:/usr/openv/pdde/pdag/bin:/usr/openv/pdde/vpfs/bin:/opt/VRTS/bin:/opt/VRTSvcs/bin"
 xxx=($def:$nbu)
 echo $xxx
 sed -i "s|$def|$xxx|g" /root/.bash_profile
@@ -99,7 +99,6 @@ echo BPJOBD_NUM_CONNECTION_THREADS = 50 | nbsetconfig
 echo BPJOBD_MAX_RQST_PER_JM = 200 | nbsetconfig
 echo BPJOBD_MAX_DB_READ_CONNECTIONS = 16 | nbsetconfig
 echo PEM_USE_SAME_HOST_BY_NAME = 0 | nbsetconfig
-
 echo REPLACE_IMAGE_SIZE_WITH_DATA_TRANSFERRED = REPLACE_IMAGE_SIZE_FOR_ACCL_ALL_ALL | nbsetconfig
 echo KEEP_JOBS_HOURS = 192 | nbsetconfig
 echo VIRTUALIZATION_HOSTS_SECURE_CONNECT_ENABLED = NO | nbsetconfig
