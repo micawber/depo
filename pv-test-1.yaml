@@ -17,7 +17,7 @@ spec:
   volumeMode: Filesystem
   resources:
     requests:
-      storage: 5Gi
+      storage: 4Gi
 
 ---
 apiVersion: v1
