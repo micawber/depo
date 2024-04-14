@@ -14,7 +14,7 @@ metadata:
   labels:
     app: minio
 spec:
-  storageClassName: cstor-storage-class-x1
+  storageClassName: csi-datastore
   accessModes:
     - ReadWriteOnce
   resources:
@@ -30,7 +30,7 @@ metadata:
   labels:
     app: minio
 spec:
-  storageClassName: cstor-storage-class-x1
+  storageClassName: csi-datastore
   accessModes:
     - ReadWriteOnce
   resources:
