@@ -7,6 +7,7 @@ metadata:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
+  namespace: mysql
   name: mysql
 spec:
   selector:
@@ -34,18 +35,20 @@ spec:
           mountPath: /data
   volumeClaimTemplates:
   - metadata:
+      namespace: mysql
       name: disk
     spec:
       accessModes: [ "ReadWriteOnce" ]
       storageClassName: csi-vsphere
       resources:
         requests:
-          storage: 20Gi
+          storage: 8Gi
 
 ---
 apiVersion: v1
 kind: Secret
 metadata:
+  namespace: mysql
   name: mysql-pass
 type: Opaque
 data:
