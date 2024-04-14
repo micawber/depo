@@ -44,4 +44,4 @@ metadata:
 type: Opaque
 data:
   username: dbusr            
-  password: dbusr!123
+  password: dbusr123
