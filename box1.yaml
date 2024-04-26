@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: box1
+labels:
+    backup: yes
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: box1-pvc
+  namespace: box1
+spec:
+  storageClassName: csi-vsphere-datastore
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: box1-pod
+  namespace: box1
+spec:
+  containers:
+    - name: box1-frontend
+      image: nginx
+      imagePullPolicy: IfNotPresent
+      volumeMounts:
+      - mountPath: "/data"
+        name: vol1
+      securityContext:
+        runAsUser: 0
+  volumes:
+    - name: vol1
+      persistentVolumeClaim:
+        claimName: box1-pvc
+
+# Once both these files have been applied verify their status using oc get pvc,pod,volumesnapshot -n box1 and the PVC should be in Bound state and the volumesnapshot should have the ReadyToUse status as true
+
+---
+# Test volumesnapshot file
+# Apply this yaml file to create the volumesnapshot of the PVC that you created
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshot
+metadata:
+  name: test-snapshot
+  namespace: box1
+spec:
+  volumeSnapshotClassName: cstor-volume-snapshotclass-x1 ## --> volumesnapshotclass name
+  source:
+    persistentVolumeClaimName: box1-pvc ## --> Name of the pvc which you created (box1-pvc)
