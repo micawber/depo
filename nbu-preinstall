@@ -44,10 +44,15 @@ echo "fs.leases-enable = 0" >> /etc/sysctl.conf
 echo "kernel.numa_balancing = 0" >> /etc/sysctl.conf
 sysctl -p
 
-groupadd -g 1556 nbwebgrp
-useradd -g nbwebgrp -u 2024 nbwebsvc
+mkdir /usr/openv
 
-useradd -c 'NetBackup Services Account' -d /usr/openv/ nbsvcusr
+groupadd -g 1111 nbwebgrp
+useradd -c 'NetBackup Web Services Account' -g 1111 -u 1111 -d /usr/openv/wmc nbwebsvc
+usermod -s /sbin/nologin nbwebsvc
+
+groupadd -g 1112 nbsvcusr
+useradd -c 'NetBackup Service Account' -g 1112 -u 1112 nbsvcusr
+usermod -s /sbin/nologin nbsvcusr
 usermod -a -G nbwebgrp nbsvcusr
 
 def=$(cat /root/.bash_profile | grep "\$PATH")
