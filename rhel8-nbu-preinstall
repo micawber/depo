@@ -115,26 +115,3 @@ echo "SLP.JOB_SUBMISSION_INTERVAL = 15 seconds" | nbsetconfig
 echo "SLP.IMAGE_PROCESSING_INTERVAL = 15 seconds" | nbsetconfig
 echo "SLP.MAX_TIME_TIL_FORCE_SMALL_DUPLICATION_JOB = 15 seconds" | nbsetconfig
 ### Not for production ###
-
-### FLEX APPLIANCE ###
-sudo -s su -
-mkdir ~/nbu_config; cd ~/nbu_config
- 
-echo 1000000 > BPSCHED_THRESHOLD
-echo 25000000 > RBALLOC_KBYTES_THRESHOLD
-echo 3600 > REPORT_RAW_KBS
-echo 1800 > DPS_PROXYDEFAULTRECVTMO
-echo 1800 > DPS_PROXYDEFAULTSENDTMO
-echo 100000 > MAX_ENTRIES_PER_ADD
-echo 0 > NET_BUFFER_SZ
-
-sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/BPSCHED_THRESHOLD /usr/openv/netbackup/db/config
-sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/RBALLOC_KBYTES_THRESHOLD /usr/openv/netbackup/db/config 
-sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/REPORT_RAW_KBS /usr/openv/netbackup/db/config
-sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/DPS_PROXYDEFAULTRECVTMO /usr/openv/netbackup/db/config
-sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/DPS_PROXYDEFAULTSENDTMO /usr/openv/netbackup/db/config
-sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/MAX_ENTRIES_PER_ADD /usr/openv/netbackup
-sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/NET_BUFFER_SZ /usr/openv/netbackup/
-sudo /usr/openv/netbackup/bin/goodies/bpconverttouch -f
-
-for i in `0 1 2 3 4 5`; do tcpdump -nn -v -i nic$i -s 1500 -c 1 'ether[20:2] == 0x2000' ; done
