@@ -1,10 +1,12 @@
+### FLEX APPLIANCE ###
+
 ---------------o---------------
-cp /etc/opt/veritas/flex/hostagent.conf /etc/opt/veritas/flex/hostagent.conf.$HOSTNAME.$(date +"%y-%m-%d")
-vi /etc/opt/veritas/flex/hostagent.conf
-"appInstanceRootSize": "10G" 
-> change to >
-"appInstanceRootSize": "20G"
+for i in `0 1 2 3 4 5`; do tcpdump -nn -v -i nic$i -s 1500 -c 1 'ether[20:2] == 0x2000' ; done
 ---------------o---------------
+
+---------------o---------------
+### touch files ###
+sudo -s su -
 mkdir ~/nbu_config; cd ~/nbu_config
  
 echo 1000000 > BPSCHED_THRESHOLD
@@ -23,6 +25,16 @@ sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/DPS_PROXYDEFAULTSENDTM
 sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/MAX_ENTRIES_PER_ADD /usr/openv/netbackup
 sudo /opt/veritas/vxapp-manage/cp-nbu-config ~/nbu_config/NET_BUFFER_SZ /usr/openv/netbackup/
 sudo /usr/openv/netbackup/bin/goodies/bpconverttouch -f
+---------------o---------------
+
+---------------o---------------
+cp /etc/opt/veritas/flex/hostagent.conf /etc/opt/veritas/flex/hostagent.conf.$HOSTNAME.$(date +"%y-%m-%d")
+vi /etc/opt/veritas/flex/hostagent.conf
+"appInstanceRootSize": "10G" 
+> change to >
+"appInstanceRootSize": "20G"
+---------------o---------------
+
 ---------------o---------------
 p0=$(printf '=%.0s' {0..80}); p1=$(printf '=%.0s' {0..60}); p2=$(printf '=%.0s' {0..20});
 containerIDs=$(docker ps | grep "netbackup" | awk '{print $1}');
@@ -75,5 +87,8 @@ for containerID in ${containerIDs}; do
   fi
 done
 ---------------o---------------
+
+---------------o---------------
 echo "USE_ACCL_WITH_MTSTRM = 1" >> /usr/openv/lib/ost-plugins/pd.conf
 echo "MTSTRM_ALLOW_MSSQL = 1" >> /usr/openv/lib/ost-plugins/pd.conf
+---------------o---------------
