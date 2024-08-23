@@ -1,4 +1,4 @@
-yum install -y net-tools dbus curl wget mc nc vim dos2unix ntsysv sysfsutils bind-utils yum-utils nfs-utils samba samba-winbind-clients sysstat tcpdump libXtst xterm dnsmasq fuse fuse3 chrony nscd s-nail jq open-vm-tools mailcap lvm2 udev selinu* libnsl libseccomp python3-magic python-dateutil nginx ipmitool dmidecode podman podman-plugins python-libguestfs udica
+yum install -y bash-completion net-tools dbus curl wget mc nc vim dos2unix ntsysv sysfsutils bind-utils yum-utils nfs-utils samba samba-winbind-clients sysstat tcpdump libXtst xterm dnsmasq fuse fuse3 chrony nscd open-vm-tools jq mailcap lvm2 selinu* udev libnsl libseccomp python3-magic python3-libguestfs udica libtirpc nginx git fio dmidecode ipmitool s-nail podman podman-plugins python3-dateutil libxcrypt-compat
 yum install -y adcli realmd sssd oddjob oddjob-mkhomedir samba-common-tools krb5-workstation authselect-compat
 
 ln -s /usr/lib64/libncurses.so.6.2 /usr/lib64/libncurses.so.5
