@@ -29,7 +29,7 @@ metadata:
 spec:
   containers:
     - name: box1-frontend
-      image: nginx
+      image: ubi8/ubi-init:8.7-14
       imagePullPolicy: IfNotPresent
       volumeMounts:
       - mountPath: "/data"
