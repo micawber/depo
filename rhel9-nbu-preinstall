@@ -1,5 +1,7 @@
-yum install -y bash-completion net-tools dbus curl wget mc nc vim dos2unix ntsysv sysfsutils bind-utils yum-utils nfs-utils samba samba-winbind-clients sysstat tcpdump libXtst xterm dnsmasq fuse fuse3 chrony nscd open-vm-tools jq mailcap lvm2 udev udica libnsl libtirpc selinu* libseccomp nginx dmidecode ipmitool s-nail podman podman-plugins python3-dateutil libxcrypt-compat git python3-magic python3-libguestfs fio
+yum install -y bash-completion net-tools dbus curl wget mc nc vim dos2unix ntsysv sysfsutils bind-utils yum-utils nfs-utils samba samba-winbind-clients sysstat tcpdump libXtst xterm dnsmasq fuse fuse3 chrony nscd open-vm-tools jq mailcap lvm2 udev udica libnsl libtirpc selinu* libseccomp nginx dmidecode ipmitool s-nail podman podman-plugins python3-dateutil libxcrypt-compat git python3-magic
 yum install -y adcli realmd sssd oddjob oddjob-mkhomedir samba-common-tools krb5-workstation authselect-compat
+### Zorunlu değil
+yum install python3-libguestfs fio
 
 ln -s /usr/lib64/libncurses.so.6.2 /usr/lib64/libncurses.so.5
 ln -s /usr/lib64/libtinfo.so.6.2 /usr/lib64/libtinfo.so.5
