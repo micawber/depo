@@ -45,6 +45,8 @@ cat <<EOT>> /etc/security/limits.conf
 EOT
 
 echo "kernel.sem = 400 307200 128 1024" >> /etc/sysctl.conf
+echo "kernel.pid_max = 350000" >> /etc/sysctl.conf
+echo "kernel.numa_balancing = 0" >> /etc/sysctl.conf
 echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
 echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
 echo "net.core.rmem_max = 1073741824" >> /etc/sysctl.conf
@@ -52,24 +54,27 @@ echo "net.core.wmem_max = 1073741824" >> /etc/sysctl.conf
 echo "net.core.rmem_default = 524288" >> /etc/sysctl.conf
 echo "net.core.wmem_default = 524288" >> /etc/sysctl.conf
 echo "net.core.somaxconn = 1024" >> /etc/sysctl.conf
-echo "net.core.netdev_max_backlog = 30000" >> /etc/sysctl.conf
+echo "net.core.netdev_max_backlog = 250000" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_rmem = 524288 524288 1073741824" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_wmem = 524288 524288 1073741824" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_keepalive_time = 700" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_keepalive_probes = 20" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_keepalive_intvl = 10" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_fin_timeout = 5" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_tw_reuse = 0" >> /etc/sysctl.conf
 echo "vm.swappiness = 1" >> /etc/sysctl.conf
 echo "vm.overcommit_memory = 0" >> /etc/sysctl.conf
-echo "vm.overcommit_ratio = 100" >> /etc/sysctl.conf
+echo "vm.overcommit_ratio = 90" >> /etc/sysctl.conf
 echo "vm.nr_hugepages = 0" >> /etc/sysctl.conf
 echo "vm.zone_reclaim_mode = 0" >> /etc/sysctl.conf
 echo "vm.extfrag_threshold = 1000" >> /etc/sysctl.conf
 echo "vm.vfs_cache_pressure = 200" >> /etc/sysctl.conf
+echo "vm.max_map_count = 262140" >> /etc/sysctl.conf
+echo "vm.min_free_kbytes = 2097152" >> /etc/sysctl.conf
 echo "fs.inotify.max_user_watches = 32768" >> /etc/sysctl.conf
 echo "fs.file-max = 1638400" >> /etc/sysctl.conf
 echo "fs.leases-enable = 0" >> /etc/sysctl.conf
-echo "kernel.numa_balancing = 0" >> /etc/sysctl.conf
+echo "fs.nr_open = 1048576" >> /etc/sysctl.conf
 sysctl -p
 
 mkdir /usr/openv
@@ -84,6 +89,28 @@ useradd -c 'NetBackup Service Account' -g 1112 -u 1112 nbsvcusr
 usermod -s /sbin/nologin nbsvcusr
 usermod -a -G nbwebgrp nbsvcusr
 ### PRIMARY SERVER KURULUMU DURUMUNDA GEREKLİDİR ###
+
+### Kurulum Bittikten Sonra Çalıştırılacak ###
+/usr/openv/netbackup/bin/admincmd/bpconfig -mj 96
+/usr/openv/netbackup/bin/admincmd/bpretlevel -r 99 1 d
+
+mkdir /usr/openv/netbackup/db/altnames
+touch /usr/openv/netbackup/db/altnames/No.Restrictions
+
+touch /usr/openv/netbackup/db/config/USE_BACKUP_MEDIA_SERVER_FOR_RESTORE
+touch /usr/openv/netbackup/db/config/DPS_PROXYNOEXPIRE 
+echo 3600 > /usr/openv/netbackup/db/config/DPS_PROXYDEFAULTSENDTMO
+echo 3600 > /usr/openv/netbackup/db/config/DPS_PROXYDEFAULTRECVTMO
+echo 5000000 > /usr/openv/netbackup/db/config/BPSCHED_THRESHOLD
+echo 25000000 > /usr/openv/netbackup/db/config/RBALLOC_KBYTES_THRESHOLD
+echo 3600 > /usr/openv/netbackup/db/config/REPORT_RAW_KBS
+echo 100000 > /usr/openv/netbackup/MAX_ENTRIES_PER_ADD
+echo 0 > /usr/openv/netbackup/NET_BUFFER_SZ
+
+echo PEM_USE_SAME_HOST_BY_NAME = 0 | nbsetconfig
+echo DISABLE_WHITELISTCACHE_CLEANUP_ON_JOB_START = 1 | nbsetconfig
+echo PROXY_DELAYED_SHUTDOWN = 1 | nbsetconfig
+### Kurulum Bittikten Sonra Çalıştırılacak ###
 
 ### Concat Volume on NVMe ###
 mkdir /MSDP
