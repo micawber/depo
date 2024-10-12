@@ -110,6 +110,11 @@ echo DISABLE_WHITELISTCACHE_CLEANUP_ON_JOB_START = 1 | nbsetconfig
 echo PROXY_DELAYED_SHUTDOWN = 1 | nbsetconfig
 ### Kurulum Bittikten Sonra Çalıştırılacak ###
 
+### NetBackup 10.5 ve üstü için yapılacak ###
+echo "/usr/bin/ldmtool /usr/lib64/libldm-1.0.so.0 /usr/lib64/libldm-1.0.so.0.0.0" > /usr/lib64/guestfs/supermin.d/hostfiles-for-ldm
+echo 'readline glib2 json-glib libuuid device-mapper zlib' > /usr/lib64/guestfs/supermin.d/packages-for-ldm
+### NetBackup 10.5 ve üstü için yapılacak ###
+
 ### Concat Volume on NVMe ###
 mkdir /MSDP
 parted --script /dev/nvme0n2 unit GiB mklabel gpt mkpart primary 0% 100%
