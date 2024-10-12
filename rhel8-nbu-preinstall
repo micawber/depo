@@ -119,6 +119,11 @@ echo REPLACE_IMAGE_SIZE_WITH_DATA_TRANSFERRED = REPLACE_IMAGE_SIZE_FOR_ACCL_ALL_
 echo KEEP_JOBS_HOURS = 192 | nbsetconfig
 echo VIRTUALIZATION_HOSTS_SECURE_CONNECT_ENABLED = NO | nbsetconfig
 
+### NetBackup 10.5 ve üstü için yapılacak ###
+echo "/usr/bin/ldmtool /usr/lib64/libldm-1.0.so.0 /usr/lib64/libldm-1.0.so.0.0.0" > /usr/lib64/guestfs/supermin.d/hostfiles-for-ldm
+echo "readline glib2 json-glib libuuid device-mapper zlib" > /usr/lib64/guestfs/supermin.d/packages-for-ldm
+### NetBackup 10.5 ve üstü için yapılacak ###
+
 ### Not for production ###
 echo "SLP.JOB_SUBMISSION_INTERVAL = 15 seconds" | nbsetconfig
 echo "SLP.IMAGE_PROCESSING_INTERVAL = 15 seconds" | nbsetconfig
