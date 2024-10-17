@@ -124,6 +124,8 @@ echo "/usr/bin/ldmtool /usr/lib64/libldm-1.0.so.0 /usr/lib64/libldm-1.0.so.0.0.0
 echo "readline glib2 json-glib libuuid device-mapper zlib" > /usr/lib64/guestfs/supermin.d/packages-for-ldm
 ### NetBackup 10.5 ve üstü için yapılacak ###
 
+/usr/openv/netbackup/bin/admincmd/bpnbaz -AddRBACPrincipal -User unixpwd:/etc/passwd:localuser
+
 ### Not for production ###
 echo "SLP.JOB_SUBMISSION_INTERVAL = 15 seconds" | nbsetconfig
 echo "SLP.IMAGE_PROCESSING_INTERVAL = 15 seconds" | nbsetconfig
