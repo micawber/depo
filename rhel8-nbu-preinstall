@@ -7,6 +7,24 @@ curl -k -LO https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64; 
 ln -s /usr/lib64/libncurses.so.6.1 /usr/lib64/libncurses.so.5
 ln -s /usr/lib64/libtinfo.so.6.1 /usr/lib64/libtinfo.so.5
 
+def=$(cat /root/.bash_profile | grep "\$PATH")
+echo $def
+nbu="/usr/openv/netbackup/bin:/usr/openv/netbackup/bin/admincmd:/usr/openv/netbackup/bin/goodies:/usr/openv/netbackup/bin/goodies/support:/usr/openv/volmgr/bin:/usr/openv/pdde/pdcr/bin:/usr/openv/pdde/pdag/bin:/usr/openv/pdde/vpfs/bin:/opt/VRTS/bin:/opt/VRTSvcs/bin"
+xxx=($def:$nbu)
+echo $xxx
+sed -i "s|$def|$xxx|g" /root/.bash_profile
+source /root/.bash_profile
+
+export GREP_COLOR='1;31'
+export PS1="\[\e[1;33m\]\u\[\e[m\]@\[\e[1;36m\]\h\[\e[m\]:\$PWD> "
+
+echo "insecure" >> $HOME/.curlrc
+echo ":set hlsearch" >> .vimrc
+echo ":set ic" >> .vimrc
+echo ":set number" >> .vimrc
+echo ":colo elflord" >> .vimrc
+echo ":syntax on" >> .vimrc
+
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 
@@ -57,6 +75,7 @@ sysctl -p
 
 mkdir /usr/openv
 
+### PRIMARY SERVER KURULUMU DURUMUNDA GEREKLİDİR ###
 groupadd -g 1111 nbwebgrp
 useradd -c 'NetBackup Web Services Account' -g 1111 -u 1111 -d /usr/openv/wmc nbwebsvc
 usermod -s /sbin/nologin nbwebsvc
@@ -65,24 +84,36 @@ groupadd -g 1112 nbsvcusr
 useradd -c 'NetBackup Service Account' -g 1112 -u 1112 nbsvcusr
 usermod -s /sbin/nologin nbsvcusr
 usermod -a -G nbwebgrp nbsvcusr
+### PRIMARY SERVER KURULUMU DURUMUNDA GEREKLİDİR ###
 
-def=$(cat /root/.bash_profile | grep "\$PATH")
-echo $def
-nbu="/usr/openv/netbackup/bin:/usr/openv/netbackup/bin/admincmd:/usr/openv/netbackup/bin/goodies:/usr/openv/netbackup/bin/goodies/support:/usr/openv/volmgr/bin:/usr/openv/pdde/pdcr/bin:/usr/openv/pdde/pdag/bin:/usr/openv/pdde/vpfs/bin:/opt/VRTS/bin:/opt/VRTSvcs/bin"
-xxx=($def:$nbu)
-echo $xxx
-sed -i "s|$def|$xxx|g" /root/.bash_profile
-source /root/.bash_profile
+### Kurulum Bittikten Sonra Çalıştırılacak ###
+/usr/openv/netbackup/bin/admincmd/bpconfig -mj 96
+/usr/openv/netbackup/bin/admincmd/bpretlevel -r 99 1 d
 
-export GREP_COLOR='1;31'
-export PS1="\[\e[1;33m\]\u\[\e[m\]@\[\e[1;36m\]\h\[\e[m\]:\$PWD> "
+mkdir /usr/openv/netbackup/db/altnames
+touch /usr/openv/netbackup/db/altnames/No.Restrictions
 
-echo "insecure" >> $HOME/.curlrc
-echo ":set hlsearch" >> .vimrc
-echo ":set ic" >> .vimrc
-echo ":set number" >> .vimrc
-echo ":colo elflord" >> .vimrc
-echo ":syntax on" >> .vimrc
+touch /usr/openv/netbackup/db/config/USE_BACKUP_MEDIA_SERVER_FOR_RESTORE
+touch /usr/openv/netbackup/db/config/DPS_PROXYNOEXPIRE 
+echo 3600 > /usr/openv/netbackup/db/config/DPS_PROXYDEFAULTSENDTMO
+echo 3600 > /usr/openv/netbackup/db/config/DPS_PROXYDEFAULTRECVTMO
+echo 5000000 > /usr/openv/netbackup/db/config/BPSCHED_THRESHOLD
+echo 25000000 > /usr/openv/netbackup/db/config/RBALLOC_KBYTES_THRESHOLD
+echo 3600 > /usr/openv/netbackup/db/config/REPORT_RAW_KBS
+echo 100000 > /usr/openv/netbackup/MAX_ENTRIES_PER_ADD
+echo 0 > /usr/openv/netbackup/NET_BUFFER_SZ
+
+echo PEM_USE_SAME_HOST_BY_NAME = 0 | nbsetconfig
+echo DISABLE_WHITELISTCACHE_CLEANUP_ON_JOB_START = 1 | nbsetconfig
+echo PROXY_DELAYED_SHUTDOWN = 1 | nbsetconfig
+### Kurulum Bittikten Sonra Çalıştırılacak ###
+
+### NetBackup 10.5 ve üstü için yapılacak ###
+echo "/usr/bin/ldmtool /usr/lib64/libldm-1.0.so.0 /usr/lib64/libldm-1.0.so.0.0.0" > /usr/lib64/guestfs/supermin.d/hostfiles-for-ldm
+echo "readline glib2 json-glib libuuid device-mapper zlib" > /usr/lib64/guestfs/supermin.d/packages-for-ldm
+### NetBackup 10.5 ve üstü için yapılacak ###
+
+/usr/openv/netbackup/bin/admincmd/bpnbaz -AddRBACPrincipal -User unixpwd:/etc/passwd:localusr
 
 ### Concat Volume for MSDP ###
 mkdir /MSDP
@@ -92,39 +123,9 @@ vgcreate vg_nbu_msdp /dev/sdb1
 lvcreate -l 100%FREE -n vol1 vg_nbu_msdp
 mkfs.xfs /dev/vg_nbu_msdp/vol1
 echo -e "/dev/vg_nbu_msdp/vol1\t/MSDP\txfs\tdefaults\t0 0" >> /etc/fstab
+systemctl daemon-reload
 mount -a
 ####
-
-### Kurulum Bittikten Sonra Çalıştırılacak ###
-mkdir /usr/openv/netbackup/db/altnames
-touch /usr/openv/netbackup/db/altnames/No.Restrictions
-
-touch /usr/openv/netbackup/db/config/DPS_PROXYNOEXPIRE 
-echo 3600 > /usr/openv/netbackup/db/config/DPS_PROXYDEFAULTSENDTMO
-echo 3600 > /usr/openv/netbackup/db/config/DPS_PROXYDEFAULTRECVTMO
-echo 1000000 > /usr/openv/netbackup/db/config/BPSCHED_THRESHOLD
-echo 25000000 > /usr/openv/netbackup/db/config/RBALLOC_KBYTES_THRESHOLD
-echo 3600 > /usr/openv/netbackup/db/config/REPORT_RAW_KBS
-echo 100000 > /usr/openv/netbackup/MAX_ENTRIES_PER_ADD
-echo 0 > /usr/openv/netbackup/NET_BUFFER_SZ
-
-echo DBM_NEW_IMAGE_DELAY = 1000 | nbsetconfig 
-echo PROXY_DELAYED_SHUTDOWN = 1 | nbsetconfig 
-echo DISABLE_WHITELISTCACHE_CLEANUP_ON_JOB_START = 1 | nbsetconfig
-echo BPJOBD_NUM_CONNECTION_THREADS = 50 | nbsetconfig
-echo BPJOBD_MAX_RQST_PER_JM = 200 | nbsetconfig
-echo BPJOBD_MAX_DB_READ_CONNECTIONS = 16 | nbsetconfig
-echo PEM_USE_SAME_HOST_BY_NAME = 0 | nbsetconfig
-echo REPLACE_IMAGE_SIZE_WITH_DATA_TRANSFERRED = REPLACE_IMAGE_SIZE_FOR_ACCL_ALL_ALL | nbsetconfig
-echo KEEP_JOBS_HOURS = 192 | nbsetconfig
-echo VIRTUALIZATION_HOSTS_SECURE_CONNECT_ENABLED = NO | nbsetconfig
-
-### NetBackup 10.5 ve üstü için yapılacak ###
-echo "/usr/bin/ldmtool /usr/lib64/libldm-1.0.so.0 /usr/lib64/libldm-1.0.so.0.0.0" > /usr/lib64/guestfs/supermin.d/hostfiles-for-ldm
-echo "readline glib2 json-glib libuuid device-mapper zlib" > /usr/lib64/guestfs/supermin.d/packages-for-ldm
-### NetBackup 10.5 ve üstü için yapılacak ###
-
-/usr/openv/netbackup/bin/admincmd/bpnbaz -AddRBACPrincipal -User unixpwd:/etc/passwd:localuser
 
 ### Not for production ###
 echo "SLP.JOB_SUBMISSION_INTERVAL = 15 seconds" | nbsetconfig
