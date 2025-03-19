@@ -4,7 +4,7 @@ yum install -y adcli realmd sssd oddjob oddjob-mkhomedir samba-common-tools krb5
 dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
 yum install -y libguestfs python3-libguestfs libguestfs-winsupport libldm
 echo "/usr/bin/ldmtool /usr/lib64/libldm-1.0.so.0 /usr/lib64/libldm-1.0.so.0.0.0" > /usr/lib64/guestfs/supermin.d/hostfiles-for-ldm
-echo "readline glib2 json-glib libuuid device-mapper zlib" > /usr/lib64/guestfs/supermin.d/packages-for-ldm
+echo -e "readline\nglib2\njson-glib\nlibuuid\ndevice-mapper\nzlib" > /usr/lib64/guestfs/supermin.d/packages-for-ldm
 
 rpm -hiv https://dl.fedoraproject.org/pub/epel/9/Everything/x86_64/Packages/n/ncurses-compat-libs-6.2-8.20210508.1.el9.x86_64.rpm
 rpm -hiv https://dl.fedoraproject.org/pub/epel/9/Everything/x86_64/Packages/s/s3fs-fuse-1.95-1.el9.x86_64.rpm
