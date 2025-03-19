@@ -127,9 +127,9 @@ echo PROXY_DELAYED_SHUTDOWN = 1 | nbsetconfig
 
 ### Concat Volume on NVMe ###
 mkdir /MSDP
-parted --script /dev/nvme0n1 unit GiB mklabel gpt mkpart primary 0% 100%
-pvcreate /dev/nvme0n1p1
-vgcreate vg_nbu_msdp /dev/nvme0n1p1
+parted --script /dev/nvme0n2 unit GiB mklabel gpt mkpart primary 0% 100%
+pvcreate /dev/nvme0n2p1
+vgcreate vg_nbu_msdp /dev/nvme0n2p1
 lvcreate -l 100%FREE -n vol1 vg_nbu_msdp
 mkfs.xfs /dev/vg_nbu_msdp/vol1
 echo -e "/dev/vg_nbu_msdp/vol1\t/MSDP\txfs\tdefaults\t0 0" >> /etc/fstab
