@@ -53,3 +53,8 @@ echo 3600 > REPORT_RAW_KBS
 
 cd \netbackup\bin
 echo DISABLE_WHITELISTCACHE_CLEANUP_ON_JOB_START=1 | nbsetconfig
+
+
+pdcfg --write=$crPath --section=CRDataStore --option=CompactMaxPo --value=3000
+pdcfg --write=$crPath --section=CRDataStore --option=RebaseLocalityThreshold --value=32
+pdcfg --write=$crPath --section=CRDataStore --option=RebaseMaxTime --value=30
