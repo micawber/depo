@@ -15,3 +15,41 @@ setx path "%path%;C:\Program Files\Veritas\NetBackup\bin;C:\Program Files\Verita
 HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\Tcpip\Parameters
 KeepAliveTime = 750000 (REG_DWORD)
 KeepAliveInterval = 15000 (REG_DWORD)
+New-ItemProperty -Path "HKLM:\System\CurrentControlSet\Services\TcpIp\Parameters" -Name "KeepAliveTime" -PropertyType DWORD -Value 750000 -Force
+New-ItemProperty -Path "HKLM:\System\CurrentControlSet\Services\TcpIp\Parameters" -Name "KeepAliveInterval" -PropertyType DWORD -Value 15000 -Force
+
+### Primary Server ###
+cd \netbackup\
+echo 0 > NET_BUFFER_SZ
+echo 100000 > MAX_ENTRIES_PER_ADD
+
+cd \netbackup\db\
+mkdir config
+cd config
+echo 5000000 > BPSCHED_THRESHOLD
+echo 25000000 > RBALLOC_KBYTES_THRESHOLD
+echo 3600 > REPORT_RAW_KBS
+
+cd \netbackup\bin
+echo BPJOBD_NUM_CONNECTION_THREADS = 50 |nbsetconfig
+echo BPJOBD_MAX_RQST_PER_JM = 200 |nbsetconfig
+echo BPJOBD_MAX_DB_READ_CONNECTIONS = 16 |nbsetconfig
+echo DISABLE_WHITELISTCACHE_CLEANUP_ON_JOB_START=1 | nbsetconfig
+echo PEM_USE_SAME_HOST_BY_NAME = 0 |nbsetconfig
+echo PROXY_DELAYED_SHUTDOWN = 1 | nbsetconfig
+echo DBM_NEW_IMAGE_DELAY = 1000 | nbsetconfig
+
+### Media Server ###
+cd \netbackup\
+echo 0 > NET_BUFFER_SZ
+echo 100000 > MAX_ENTRIES_PER_ADD
+
+cd \netbackup\db\
+mkdir config
+cd config
+echo 5000000 > BPSCHED_THRESHOLD
+echo 25000000 > RBALLOC_KBYTES_THRESHOLD
+echo 3600 > REPORT_RAW_KBS
+
+cd \netbackup\bin
+echo DISABLE_WHITELISTCACHE_CLEANUP_ON_JOB_START=1 | nbsetconfig
