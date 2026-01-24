@@ -19,6 +19,7 @@ EOF
 
 cat <<EOT>> /root/.bashrc
 alias vi='vim'
+alias grep='grep --color=always'
 EOT
 
 cat <<EOT>> /root/.bash_profile
@@ -26,8 +27,7 @@ $(echo)
 PATH=\$PATH:\$HOME/bin:/usr/openv/netbackup/bin:/usr/openv/netbackup/bin/admincmd:/usr/openv/netbackup/bin/goodies:/usr/openv/volmgr/bin:/usr/openv/pdde/pdcr/bin:/usr/openv/pdde/pdag/bin:/usr/openv/pdde/vpfs/bin:/opt/VRTS/bin:/opt/VRTSvcs/bin
 export PATH
 export GREP_COLORS="sl=1;34"
-export GREP_OPTIONS="--color=always"
-export PS1="\[\e[1;32m\]\u\[\e[m\]@\[\e[1;35m\]\h\[\e[m\]:\$PWD> "
+export PS1="\[\e[1;32m\]\u\[\e[m\]@\[\e[1;33m\]\h\[\e[m\]:\$PWD> "
 EOT
 
 echo "insecure" >> $HOME/.curlrc
