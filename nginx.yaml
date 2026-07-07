@@ -12,7 +12,7 @@ metadata:
   name: nginx-pvc
   namespace: nginx
 spec:
-  storageClassName: cstor-storage-class-x1
+  storageClassName: huawei-dorado-nfs
   accessModes:
     - ReadWriteOnce
   volumeMode: Filesystem
