@@ -44,7 +44,7 @@ cat <<EOT>> /etc/security/limits.conf
 *      hard    stack          63535
 EOT
 
-echo "kernel.sem = 400 307200 128 1024" >> /etc/sysctl.conf
+echo "kernel.sem = 400 409600 128 4096" >> /etc/sysctl.conf
 echo "kernel.pid_max = 350000" >> /etc/sysctl.conf
 echo "kernel.numa_balancing = 0" >> /etc/sysctl.conf
 echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
