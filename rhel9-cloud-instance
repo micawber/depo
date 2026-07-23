@@ -7,7 +7,7 @@ nmcli general hostname bxk-az-crs.vrts.lab
 
 echo -e "`hostname -I`\t`hostname -f`\t`hostname -s`">> /etc/hosts
 
-lvextend -l 100%FREE /dev/rootvg/usrlv
+lvextend -l +100%FREE /dev/rootvg/lv-usr
 xfs_growfs /usr
 
 mkdir /MSDP
