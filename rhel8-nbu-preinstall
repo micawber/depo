@@ -5,7 +5,7 @@ yum install python36 perl libhbaapi.x86_64 libhbalinux.x86_64
 rpm -hiv https://dl.fedoraproject.org/pub/epel/8/Everything/x86_64/Packages/s/s3fs-fuse-1.95-1.el8.x86_64.rpm
 rpm -hiv https://dl.fedoraproject.org/pub/epel/8/Everything/x86_64/Packages/s/s3cmd-2.4.0-1.el8.noarch.rpm
 
-curl -k -LO https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64; chmod 777 jq-linux64; mv jq-linux64 /bin/jq
+curl -k -LO https://github.com/jqlang/jq/releases/download/jq-1.8.2/jq-linux-amd64; chmod 777 jq-linux-amd64; mv jq-linux-amd64 /bin/jq
 
 ln -s /usr/lib64/libncurses.so.6.1 /usr/lib64/libncurses.so.5
 ln -s /usr/lib64/libtinfo.so.6.1 /usr/lib64/libtinfo.so.5
