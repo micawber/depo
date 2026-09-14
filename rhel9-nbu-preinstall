@@ -122,8 +122,10 @@ echo 3600 > /usr/openv/netbackup/db/config/REPORT_RAW_KBS
 echo 100000 > /usr/openv/netbackup/MAX_ENTRIES_PER_ADD
 echo 0 > /usr/openv/netbackup/NET_BUFFER_SZ
 
+
 echo 30 > /usr/openv/netbackup/db/config/OPT_DUP_WAIT_SLEEP --> Media Server
 
+echo MAX_JOBS_PER_SECOND = 2 | nbsetconfig
 echo PEM_USE_SAME_HOST_BY_NAME = 0 | nbsetconfig
 echo DISABLE_WHITELISTCACHE_CLEANUP_ON_JOB_START = 1 | nbsetconfig
 echo PROXY_DELAYED_SHUTDOWN = 1 | nbsetconfig
