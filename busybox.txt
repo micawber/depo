@@ -1,0 +1,39 @@
+kubectl exec -it pod/busybox -n busybox -- /bin/sh
+
+
+kubectl create ns busybox
+
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: busybox-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi
+EOF
+
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busybox
+spec:
+  containers:
+    - name: busybox
+      image: busybox:1.36
+      command: [ "/bin/sh", "-c", "tail -f /dev/null" ]
+      volumeMounts:
+      - name: volume1
+        mountPath: "/mnt/volume1"
+  volumes:
+  - name: volume1
+    persistentVolumeClaim:
+      claimName: busybox-pvc
+  restartPolicy: Never
+EOF
+
+kubectl exec -it pod/busybox -n busybox -- /bin/sh
