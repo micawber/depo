@@ -1,6 +1,3 @@
-kubectl exec -it pod/busybox -n busybox -- /bin/sh
-
-
 kubectl create ns busybox
 
 kubectl apply -f - <<EOF
