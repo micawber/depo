@@ -1,0 +1,97 @@
+yum install -y bash-completion net-tools dbus curl wget mc nc vim dos2unix s-nail ntsysv sysfsutils bind-utils yum-utils nfs-utils samba samba-winbind-clients sysstat tcpdump libXtst xterm dnsmasq fuse fuse3 chrony jq mailcap lvm2 udev udica libnsl libseccomp libtirpc selinu* nginx git dmidecode ipmitool libxcrypt-compat python3-dateutil python3-magic awscli podman open-vm-tools
+
+yum install -y adcli realmd sssd oddjob oddjob-mkhomedir samba-common-tools krb5-workstation authselect
+
+rpm -hiv https://dl.fedoraproject.org/pub/epel/10/Everything/x86_64/Packages/n/ncurses-compat-libs-6.4-13.20240127.1.el10_0.x86_64.rpm
+
+cat <<'EOF' | sed -i "7r /dev/stdin" /etc/inputrc
+set enable-bracketed-paste off
+EOF
+
+cat <<EOT>> /root/.bashrc
+alias vi='vim'
+alias grep='grep --color=always'
+EOT
+
+cat <<EOT>> /root/.bash_profile
+$(echo)
+PATH=\$PATH:\$HOME/bin:/usr/openv/netbackup/bin:/usr/openv/netbackup/bin/admincmd:/usr/openv/netbackup/bin/goodies:/usr/openv/volmgr/bin:/usr/openv/pdde/pdcr/bin:/usr/openv/pdde/pdag/bin:/usr/openv/pdde/vpfs/bin:/opt/VRTS/bin:/opt/VRTSvcs/bin
+export PATH
+export GREP_COLORS="sl=1;34"
+export PS1="\[\e[1;32m\]\u\[\e[m\]@\[\e[1;33m\]\h\[\e[m\]:\$PWD> "
+EOT
+
+echo "insecure" >> $HOME/.curlrc
+echo ":set hlsearch" >> .vimrc
+echo ":set ic" >> .vimrc
+echo ":set number" >> .vimrc
+echo ":colo elflord" >> .vimrc
+echo ":syntax on" >> .vimrc
+
+sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+
+systemctl stop firewalld
+systemctl disable firewalld
+
+cat <<EOT>> /etc/security/limits.conf
+*      soft    core           unlimited
+*      hard    core           unlimited
+*      soft    nofile         32768
+*      hard    nofile         63535
+*      soft    stack          32768
+*      hard    stack          63535
+EOT
+
+echo "kernel.msgmni = 1024" >> /etc/sysctl.conf
+echo "kernel.sem = 400 409600 128 4096" >> /etc/sysctl.conf
+echo "kernel.pid_max = 350000" >> /etc/sysctl.conf
+echo "kernel.numa_balancing = 0" >> /etc/sysctl.conf
+echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
+echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
+echo "net.core.rmem_max = 1073741824" >> /etc/sysctl.conf
+echo "net.core.wmem_max = 1073741824" >> /etc/sysctl.conf
+echo "net.core.rmem_default = 524288" >> /etc/sysctl.conf
+echo "net.core.wmem_default = 524288" >> /etc/sysctl.conf
+echo "net.core.somaxconn = 1024" >> /etc/sysctl.conf
+echo "net.core.netdev_max_backlog = 250000" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_rmem = 524288 524288 1073741824" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_wmem = 524288 524288 1073741824" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_keepalive_time = 700" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_keepalive_probes = 20" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_keepalive_intvl = 10" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_tw_reuse = 1" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_fin_timeout = 15" >> /etc/sysctl.conf
+echo "vm.swappiness = 10" >> /etc/sysctl.conf
+echo "vm.overcommit_memory = 0" >> /etc/sysctl.conf
+echo "vm.overcommit_ratio = 90" >> /etc/sysctl.conf
+echo "vm.nr_hugepages = 0" >> /etc/sysctl.conf
+echo "vm.zone_reclaim_mode = 0" >> /etc/sysctl.conf
+echo "vm.extfrag_threshold = 1000" >> /etc/sysctl.conf
+echo "vm.vfs_cache_pressure = 200" >> /etc/sysctl.conf
+echo "vm.max_map_count = 262140" >> /etc/sysctl.conf
+echo "vm.min_free_kbytes = 2097152" >> /etc/sysctl.conf
+echo "vm.dirty_background_ratio = 5" >> /etc/sysctl.conf
+echo "vm.dirty_ratio = 10" >> /etc/sysctl.conf
+echo "fs.inotify.max_user_watches = 32768" >> /etc/sysctl.conf
+echo "fs.file-max = 1638400" >> /etc/sysctl.conf
+echo "fs.leases-enable = 0" >> /etc/sysctl.conf
+echo "fs.nr_open = 1048576" >> /etc/sysctl.conf
+sysctl -p
+
+echo -e "`hostname -I`\t`hostname -f`\t`hostname -s`">> /etc/hosts
+
+mkdir /usr/openv
+
+### PRIMARY SERVER KURULUMU DURUMUNDA GEREKLİDİR ###
+groupadd -g 1111 nbwebgrp
+useradd -c 'NetBackup Web Services Account' -g 1111 -u 1111 -d /usr/openv/wmc nbwebsvc
+usermod -s /sbin/nologin nbwebsvc
+
+groupadd -g 1112 nbsvcusr
+useradd -c 'NetBackup Service Account' -g 1112 -u 1112 nbsvcusr
+usermod -s /sbin/nologin nbsvcusr
+usermod -a -G nbwebgrp nbsvcusr
+### PRIMARY SERVER KURULUMU DURUMUNDA GEREKLİDİR ###
+
+### REBOOT ###
